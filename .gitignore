@@ -1,0 +1,10 @@
+/node_modules/
+/.idea/
+/src/main/ngapp/node_modules/
+/target/classes/
+/src/main/webapp/ih/
+/target/
+/package-lock.json
+/src/main/ngapp/package-lock.json
+/src/main/ngapp/.angular
+/dist

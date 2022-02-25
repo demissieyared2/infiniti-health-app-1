@@ -1,0 +1,199 @@
+<app-header></app-header>
+
+<div class="bg-light">
+
+    <br><br><br><br>
+
+    <div class="container">
+        <div class="row mb-2">
+            <div class="col-sm-12 small text-uppercase text-monospace font-weight-bold">
+                <a style="color: black" href="/">Home</a> / <span class="text-muted">COVID-19 Test Results</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container bg-white shadow-sm p-5">
+
+        <div class="row">
+            <div class="col-sm-12">
+                <h3>COVID-19 Test Result</h3>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-12">
+                <ngb-progressbar type="primary" [showValue]="false" [value]="progress"
+                                 style="height: 10px"></ngb-progressbar>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-12 text-right font-weight-bold small" *ngIf="test.district">
+                {{test.district.label}} <span class="text-muted">District</span>
+                <span *ngIf="test.school">, {{test.school.name}} <span class="text-muted">School</span></span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3 pt-4">
+                <label for="district" class="font-weight-bold text-muted">District (optional)</label>:<br>
+                <select class="custom-select" id="district" required [(ngModel)]="test.district" name="district"
+                        style="width: 180px" (ngModelChange)="districtSelected()" [disabled]="submittingReport">
+                    <option selected [ngValue]=undefined>Choose One...</option>
+                    <option *ngFor="let district of districts" [ngValue]="district">{{district.label}}</option>
+                </select>
+            </div>
+
+            <div class="col-md-6 mb-3 pt-4" *ngIf="test.district">
+
+                <ng-container *ngIf="!availableSchools">
+                    <label for="school" class="text-muted font-weight-bold">School (optional)</label>:
+                    <input type="text" class="form-control" placeholder="Start entering school name..."
+                           name="school" id="school"
+                           (selectItem)="schoolSelected($event)"
+                           [(ngModel)]="test.school"
+                           [editable]="false"
+                           [ngbTypeahead]="searchDistrictSchools"
+                           [inputFormatter]="formatter"
+                           [resultFormatter]="formatter"
+                           #instance="ngbTypeahead">
+                </ng-container>
+            </div>
+        </div>
+
+        <hr>
+
+        <div class="row mb-3 pt-4">
+            <div class="col-sm-6">
+                <label for="role" class="font-weight-bold text-muted">Select the department you report to</label>
+                <span class="text-danger font-weight-bolder">*</span>
+            </div>
+
+            <div class="col-sm-4">
+                <select class="custom-select" id="role" required name="role" [(ngModel)]="test.department"
+                        (ngModelChange)="modelChange()" [disabled]="submittingReport"
+                        [ngClass]="{'is-invalid': validation.department}">
+                    <option selected disabled [ngValue]=undefined>Choose One...</option>
+                    <option *ngFor="let department of departments" [ngValue]="department">{{department}}</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-sm-6">
+                <label for="role" class="font-weight-bold text-muted">Date of test</label>
+                <span class="text-danger font-weight-bolder">*</span>
+            </div>
+
+            <div class="col-sm-6">
+                <div class="input-group w-50">
+                    <input class="form-control" [(ngModel)]="test.date" [maxDate]="maxDate"
+                           (dateSelect)="dateSelected($event)" [ngClass]="{'is-invalid': validation.date}"
+                           placeholder="mm/dd/yyyy" name="dp" ngbDatepicker #d="ngbDatepicker">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary calendar" (click)="d.toggle()" type="button">
+                            <i class="fa fa-fw fa-calendar"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-sm-6">
+                <label for="role" class="font-weight-bold text-muted">Where did you get tested?</label>
+                <span class="text-danger font-weight-bolder">*</span>
+            </div>
+
+            <div class="col-sm-6">
+                <input class="form-control" [(ngModel)]="test.location" placeholder="e.g. Mobile Site" maxlength="254"
+                       (blur)="modelChange()" [ngClass]="{'is-invalid': validation.location}">
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-sm-6">
+                <label for="test-result" class="font-weight-bold text-muted">What was your test result?</label>
+                <span class="text-danger font-weight-bolder">*</span>
+            </div>
+
+            <div class="col-sm-3">
+                <select class="custom-select" id="test-result" required name="test-result" [(ngModel)]="test.result"
+                        (ngModelChange)="testResultSelected()" [disabled]="submittingReport"
+                        [ngClass]="{'is-invalid': validation.result}">
+                    <option selected disabled [ngValue]=undefined>Choose One...</option>
+                    <option *ngFor="let result of resultOptions" [ngValue]="result">{{result}}</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-sm-6 align-items-center">
+                <label for="role" class="font-weight-bold text-muted">Upload a picture of the results</label>
+                <span class="text-danger font-weight-bolder">*</span>
+            </div>
+
+            <div class="col-sm-6">
+                <div [ngClass]="{'border border-danger p-1 rounded': validation.picture, 'opacity-2': this.resultFile.inProgress}">
+                    <input type="file" class="d-none" (change)="onFileSelected($event)" #fileUpload
+                           [disabled]="this.resultFile.inProgress">
+
+                    <div class="d-flex p-2 cursor-pointer file-upload" (click)="fileUpload.click()">
+                        <div class="p-2">
+                            <i class="fa fa-fw fa-2x fa-cloud-upload text-primary text-left"
+                               *ngIf="!this.resultFile.inProgress"></i>
+                            <i class="fa fa-spinner fa-spin fa-2x fa-fw text-primary text-left"
+                               *ngIf="this.resultFile.inProgress"></i>
+                        </div>
+
+                        <div class="align-self-start" *ngIf="!resultFile.size">
+                            <span class="text-primary">No file selected</span>
+                            <div class="text-muted small">Click to upload file</div>
+                        </div>
+
+                        <div class="align-self-start" *ngIf="resultFile.size">
+                            <span class="text-primary">{{resultFile.name}}
+                                - {{(resultFile.size / 1000000) | number}}MB</span>
+                            <div class="text-muted small">Click to upload file</div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <div class="small text-muted font-italic">Max file upload size: 40MB</div>
+                        <div class="small text-primary cursor-pointer" (click)="clearTestFile()"
+                             *ngIf="resultFile.size">Clear
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <hr>
+
+        <div class="row">
+            <div class="col-sm-4" *ngIf="errorSubmitting">
+                <div class="alert alert-danger p-2 small"><i class="fa fa-exclamation-triangle"></i> Error creating
+                    report. Please try again
+                </div>
+            </div>
+
+            <div class="col-sm-4" *ngIf="existingResultAvailable">
+                <div class="alert alert-warning p-2 small"><i class="fa fa-exclamation-triangle"></i>
+                    Please note you have uploaded a test result today
+                </div>
+            </div>
+
+            <div class="col text-right">
+                <button class="btn btn-primary ml-2" (click)="submitTestResult()" [disabled]="submittingReport">
+                    <span *ngIf="!submittingReport">Submit</span>
+                    <span *ngIf="submittingReport"><i class="fa fa-spinner fa-pulse fa-fw"></i> Submitting...</span>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <br><br><br><br>
+
+</div>

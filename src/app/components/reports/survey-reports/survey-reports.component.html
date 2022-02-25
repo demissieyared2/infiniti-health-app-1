@@ -1,0 +1,60 @@
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col">
+            <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-tabs">
+                <li [ngbNavItem]="'survey'">
+                    <a ngbNavLink>Quality Audits</a>
+                    <ng-template ngbNavContent>
+                        <app-audits></app-audits>
+                    </ng-template>
+                </li>
+                <li [ngbNavItem]="'hygiene'">
+                    <a ngbNavLink>Hand Hygiene</a>
+                    <ng-template ngbNavContent>
+                        <app-hygiene-reports></app-hygiene-reports>
+                    </ng-template>
+                </li>
+                <li [ngbNavItem]="'incidents'">
+                    <a ngbNavLink>Incidents</a>
+                    <ng-template ngbNavContent>
+                        <app-incident-reports></app-incident-reports>
+                    </ng-template>
+                </li>
+
+                <li [ngbNavItem]="'gloves'">
+                    <a ngbNavLink>Glove Changes</a>
+                    <ng-template ngbNavContent>
+                        <app-glove-reports></app-glove-reports>
+                    </ng-template>
+                </li>
+
+                <li [ngbNavItem]="'dhs'">
+                    <a ngbNavLink>Daily Health Screening</a>
+                    <ng-template ngbNavContent>
+                        <app-daily-screen-reports></app-daily-screen-reports>
+                    </ng-template>
+                </li>
+
+                <li [ngbNavItem]="'tests'">
+                    <a ngbNavLink>Test Results</a>
+                    <ng-template ngbNavContent>
+                        <app-test-results></app-test-results>
+                    </ng-template>
+                </li>
+
+                <li [ngbNavItem]="'vaccines'">
+                    <a ngbNavLink>Vaccination Submissions</a>
+                    <ng-template ngbNavContent>
+                        <app-vaccine-reports></app-vaccine-reports>
+                    </ng-template>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <div [ngbNavOutlet]="nav"></div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,406 @@
+<div class="container-fluid pt-2">
+
+    <div class="row mb-3 mt-3">
+        <div class="col-sm-6 pl-0">
+            <div class="w-100 border shadow-sm bg-white p-3" #containerRef>
+                <div class="row">
+                    <div class="col-sm"><b>Vaccination Status</b></div>
+                </div>
+
+                <div class="row text-center" *ngIf="single && (single[0].value || single[1].value || single[2].value)">
+                    <div class="col-md">
+                        <ngx-charts-pie-chart
+                                [view]="[containerRef.offsetWidth, 280]"
+                                [scheme]="colorScheme"
+                                [results]="single"
+                                [gradient]="true"
+                                [legend]="false"
+                                [legendPosition]="'below'"
+                                [labels]="false"
+                                [doughnut]="true">
+                            <!--                        (select)="onSelect($event)"-->
+                            <!--                        (activate)="onActivate($event)"-->
+                            <!--                        (deactivate)="onDeactivate($event)"-->
+                            <!--                >-->
+                        </ngx-charts-pie-chart>
+                    </div>
+                </div>
+
+                <div class="row font-weight-bold" *ngIf="this.single">
+                    <div class="col-sm-3 text-center" *ngFor="let v of single">{{v.value}}
+                        <br><span class="small" [ngClass]=v.style>{{v.name}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 pr-0 pl-1">
+            <div class="w-100">
+                <div class="container-fluid pr-0">
+                    <div class="row">
+                        <div class="col-md">
+                            <div class="border shadow-sm bg-white p-3" style="height: 182px">
+                                <b class="small font-weight-bold">Pending Verification</b>
+                                <div class="text-center">
+                                    <h1 class="pt-4" style="font-size: xxx-large">0</h1>
+                                    <div>Vaccination Cards</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md">
+                            <div class="border shadow-sm bg-white p-3" style="height: 182px">
+                                <b class="small font-weight-bold">Exemptions</b>
+                                <div class="text-center">
+                                    <h1 class="pt-4" style="font-size: xxx-large">0</h1>
+                                    <div>Employees</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row pt-4">
+                        <div class="col-md cursor-pointer">
+                            <div class="border shadow-sm bg-white p-3" style="height: 182px">
+                                <b class="small font-weight-bold">COVID-19 Tracking</b>
+                                <div class="p-4" *ngIf="!covidTracking">
+                                    <span class="font-italic text-muted">No COVID-19 test results available</span>
+                                </div>
+
+                                <div class="p-4" *ngIf="covidTracking">
+                                    <div class="ml-4">
+                                        <b style="font-size: large">{{covidTracking.positive}}</b> negative results
+                                    </div>
+                                    <div class="ml-4">
+                                        <b style="font-size: large">{{covidTracking.negative}}</b> positive results
+                                    </div>
+                                    <div class="ml-4">
+                                        <b style="font-size: large">{{covidTracking.inconclusive}}</b> inconclusive
+                                        results
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md">
+                            <div class="border shadow-sm bg-white p-3" style="height: 182px">
+                                <div class="mb-2">
+                                    <i class="fa fa-fw fa-exclamation-triangle text-warning mb-1"></i> &nbsp;<b
+                                        class="small font-weight-bold">Alerts</b>
+                                </div>
+
+                                <span class="font-italic">No alerts available</span>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="row border shadow-sm">
+        <div class="col-sm-12 bg-white">
+
+            <!--            <div *ngIf="!records || !records.length" class="p-3">-->
+            <!--                <span class="text-muted font-italic">No vaccination records available</span>-->
+            <!--            </div>-->
+
+            <div class="row mt-3">
+                <div class="col-sm-8">
+                    <div class="input-group mb-2">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text"><i class="fa fa-search"></i></div>
+                        </div>
+                        <input type="text" class="form-control form-control-sm" id="inlineFormInputGroup"
+                               [(ngModel)]="paging.filter" (ngModelChange)="filterChanged($event)"
+                               placeholder="Search for employee">
+                    </div>
+                </div>
+
+                <div class="col-sm-4">
+                    <div class="d-flex justify-content-around">
+
+                        <div class="text-primary font-weight-bold small">
+                            <div class="col-sm text-right">
+                                <span ngbDropdown>
+                                    <button class="btn btn-sm text-primary small font-weight-bold"
+                                            ngbDropdownToggle> <i class="fa fa-fw fa-filter"></i> Filter
+                                        <ul ngbDropdownMenu class="dropdown-menu p-1">
+                                            <li ngbDropdownItem *ngFor="let option of filterOptions"
+                                                class="small pl-2 cursor-pointer text-primary"
+                                                (click)="filterRecords(option)">
+                                                <div>{{option}}</div>
+                                            </li>
+                                        </ul>
+                                    </button>
+                                </span>
+                            </div>
+
+                        </div>
+
+                        <div class="text-primary font-weight-bold small">
+                            <div class="col-sm text-right">
+                                <span ngbDropdown>
+                                    <button class="btn btn-sm text-primary small font-weight-bold"
+                                            ngbDropdownToggle> <i class="fa fa-fw fa-sort-amount-asc"></i> Sort by
+                                        <ul ngbDropdownMenu class="dropdown-menu p-1 text-primary">
+                                            <li ngbDropdownItem *ngFor="let option of sortOptions"
+                                                class="small pl-2 cursor-pointer text-primary"
+                                                (click)="sortRecords(option)">
+                                                <div>{{option}}</div>
+                                            </li>
+                                        </ul>
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="text-primary font-weight-bold small">
+                            <button class="btn btn-sm text-primary small font-weight-bold" (click)="exportData()">
+                                <i class="fa fa-fw fa-download"></i> Export Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <table class="table table-hover mt-2" [ngClass]="{'opacity-2': paging.processing}">
+
+                <tbody *ngIf="!paging.processing && (!records || !records.length)">
+                <tr>
+                    <td class="p-4 font-italic text-muted">No records available</td>
+                </tr>
+                </tbody>
+
+                <tbody class="border-top border-bottom">
+                <tr *ngFor="let record of records">
+                    <td>
+                        <a href="#">{{record.account.firstName}} {{record.account.lastName}}</a><br>
+                        <div class="badge badge-danger p-2 mt-1" *ngIf="!record.vaccinated">Not Vaccinated</div>
+                    </td>
+                    <td>
+                        <div class="text-muted text-uppercase font-weight-bold" style="font-size: x-small">
+                            Vaccine Product
+                        </div>
+
+                        <div *ngIf="record.type && record.vaccinated">{{record.type}}</div>
+                        <div *ngIf="!record.type || !record.vaccinated">N/A</div>
+
+                        <!--                        <div class="small">-->
+                        <!--                            <i class="fa fa-fw fa-check text-success"></i> <span-->
+                        <!--                                class="text-muted font-italic">Verified</span>-->
+                        <!--                        </div>-->
+                    </td>
+                    <td>
+                        <div class="text-muted text-uppercase font-weight-bold" style="font-size: x-small">Doses</div>
+                        <div class="small"><span class="text-muted">First</span>:
+                            <span class="ml-3" *ngIf="record.firstDose">{{record.firstDose | date: 'mediumDate'}}</span>
+                            <span class="ml-3 font-italic" *ngIf="!record.firstDose">N/A</span>
+                        </div>
+                        <div class="small">
+                            <span class="text-muted">Second</span>: <span class="font-italic">N/A</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="text-muted text-uppercase font-weight-bold" style="font-size: x-small">Booster</div>
+                        <div *ngIf="record.boosterType && record.vaccinated">{{record.boosterType}}</div>
+                        <div *ngIf="!record.boosterType || !record.vaccinated">N/A</div>
+                    </td>
+                    <td>
+                        <div class="text-muted text-uppercase font-weight-bold" style="font-size: x-small">Booster
+                            Date
+                        </div>
+                        <div class="" *ngIf="record.boosterDose">{{record.boosterDose | date: 'mediumDate'}}</div>
+                        <div class="" *ngIf="!record.boosterDose || !record.vaccinated">N/A</div>
+                    </td>
+                    <td style="width: 180px">
+                    </td>
+                </tr>
+                </tbody>
+
+                <!--                <tbody class="border-top border-bottom">-->
+                <!--                <tr>-->
+                <!--                    <td>-->
+                <!--                        <a href="#">Anthony Edward Stark</a><br>-->
+                <!--                        <div class="badge badge-success p-2 mt-1">Fully Vaccinated</div>-->
+                <!--                    </td>-->
+                <!--                    <td>-->
+                <!--                        <div class="text-muted text-uppercase font-weight-bold" style="font-size: x-small">Vaccine Product</div>-->
+                <!--                        Johnson & Johnson’s Janssen-->
+                <!--                        <div class="small"><i class="fa fa-fw fa-check text-success"></i> <span-->
+                <!--                                class="text-muted font-italic">Verified</span></div>-->
+                <!--                    </td>-->
+                <!--                    <td>-->
+                <!--                        <div class="text-muted text-uppercase font-weight-bold" style="font-size: x-small">Doses</div>-->
+                <!--                        <div class="small"><span class="text-muted">First</span>: &nbsp;<span-->
+                <!--                                class="ml-3">03/02/2020</span></div>-->
+                <!--                        <div class="small">-->
+                <!--                            <span class="text-muted">Second</span>: <span class="font-italic">N/A</span>-->
+                <!--                        </div>-->
+                <!--                    </td>-->
+                <!--                    <td>-->
+                <!--                        <div class="text-muted text-uppercase font-weight-bold" style="font-size: x-small">Booster</div>-->
+                <!--                        Pfizer BioNTech-->
+                <!--                    </td>-->
+                <!--                    <td>-->
+                <!--                        <div class="text-muted text-uppercase font-weight-bold" style="font-size: x-small">Booster Date</div>-->
+                <!--                        03/02/2021-->
+                <!--                    </td>-->
+                <!--                    <td style="width: 180px">-->
+                <!--                    </td>-->
+                <!--                </tr>-->
+
+                <!--                <tr>-->
+                <!--                    <td>-->
+                <!--                        <a href="#">Dr. Henry Jonathan Pym</a><br>-->
+                <!--                        <div class="badge badge-success p-2 mt-1">Fully Vaccinated</div>-->
+                <!--                    </td>-->
+                <!--                    <td>-->
+                <!--                        <div class="text-muted text-uppercase font-weight-bold" style="font-size: x-small">Vaccine Product</div>-->
+                <!--                        Moderna-->
+                <!--                        <div class="small"><i class="fa fa-fw fa-check text-success"></i> <span-->
+                <!--                                class="text-muted font-italic">Verified</span></div>-->
+                <!--                    </td>-->
+                <!--                    <td>-->
+                <!--                        <div class="text-muted text-uppercase font-weight-bold" style="font-size: x-small">Doses</div>-->
+                <!--                        <div class="small"><span class="text-muted">First:</span> &nbsp;<span-->
+                <!--                                class="ml-3">03/02/2020</span></div>-->
+                <!--                        <div class="small"><span class="text-muted">Second:</span> 05/02/2020</div>-->
+                <!--                    </td>-->
+                <!--                    <td>-->
+                <!--                        <div class="text-muted text-uppercase font-weight-bold" style="font-size: x-small">Booster</div>-->
+                <!--                        Pfizer BioNTech-->
+                <!--                    </td>-->
+                <!--                    <td>-->
+                <!--                        <div class="text-muted text-uppercase font-weight-bold" style="font-size: x-small">Booster Date</div>-->
+                <!--                        03/02/2021-->
+                <!--                    </td>-->
+                <!--                    <td></td>-->
+                <!--                </tr>-->
+
+                <!--                <tr>-->
+                <!--                    <td>-->
+                <!--                        <a href="#">Steve Rodgers</a><br>-->
+                <!--                        <div class="badge badge-warning p-2 mt-1">Partially Vaccinated</div>-->
+                <!--                    </td>-->
+                <!--                    <td>-->
+                <!--                        <div class="text-muted text-uppercase font-weight-bold" style="font-size: x-small">Vaccine Product</div>-->
+                <!--                        Pfizer BioNTech-->
+                <!--                        <div class="small"><i class="fa fa-fw fa-exclamation-triangle text-warning"></i> <span-->
+                <!--                                class="text-muted font-italic">Not verified</span></div>-->
+                <!--                    </td>-->
+                <!--                    <td>-->
+                <!--                        <div class="text-muted text-uppercase font-weight-bold" style="font-size: x-small">Doses</div>-->
+                <!--                        <div class="small"><span class="text-muted">First:</span> &nbsp;<span-->
+                <!--                                class="ml-3">03/02/2020</span>-->
+                <!--                        </div>-->
+                <!--                        <div class="small"><span class="text-muted">Second:</span> Not entered</div>-->
+                <!--                    </td>-->
+                <!--                    <td>-->
+                <!--                        <div class="text-muted text-uppercase font-weight-bold" style="font-size: x-small">Booster</div>-->
+                <!--                        Not entered-->
+                <!--                    </td>-->
+                <!--                    <td>-->
+                <!--                        <div class="text-muted text-uppercase font-weight-bold" style="font-size: x-small">Booster Date</div>-->
+                <!--                        03/02/2021-->
+                <!--                    </td>-->
+                <!--                    <td>-->
+                <!--                        <button class="btn btn-sm btn-outline-success"><i class="fa fa-check"></i> Verify-->
+                <!--                        </button>-->
+                <!--                        <button class="btn btn-sm btn-outline-danger ml-2"><i class="fa fa-ban"></i> Reject-->
+                <!--                        </button>-->
+                <!--                    </td>-->
+                <!--                </tr>-->
+
+                <!--                <tr>-->
+                <!--                    <td>-->
+                <!--                        <a href="#">Janet van Dyne</a><br>-->
+                <!--                        <div class="badge badge-danger p-2 mt-1">Not Vaccinated</div>-->
+                <!--                    </td>-->
+                <!--                    <td>-->
+                <!--                        <div class="text-muted text-uppercase font-weight-bold" style="font-size: x-small">Vaccine Product</div>-->
+                <!--                        Johnson & Johnson’s Janssen-->
+                <!--                        <div class="small"><i class="fa fa-fw fa-exclamation-triangle text-warning"></i> <span-->
+                <!--                                class="text-muted font-italic">Not verified</span></div>-->
+                <!--                    </td>-->
+                <!--                    <td>-->
+                <!--                        <div class="text-muted text-uppercase font-weight-bold" style="font-size: x-small">Doses</div>-->
+                <!--                        <div class="small"><span class="text-muted">First</span>: &nbsp;<span-->
+                <!--                                class="ml-3">03/02/2020</span></div>-->
+                <!--                        <div class="small">-->
+                <!--                            <span class="text-muted">Second</span>: <span class="font-italic">N/A</span>-->
+                <!--                        </div>-->
+                <!--                    </td>-->
+                <!--                    <td>-->
+                <!--                        <div class="text-muted text-uppercase font-weight-bold" style="font-size: x-small">Booster</div>-->
+                <!--                        Pfizer BioNTech-->
+                <!--                    </td>-->
+                <!--                    <td>-->
+                <!--                        <div class="text-muted text-uppercase font-weight-bold" style="font-size: x-small">Booster Date</div>-->
+                <!--                        03/02/2021-->
+                <!--                    </td>-->
+                <!--                    <td>-->
+                <!--                        <button class="btn btn-sm btn-outline-success"><i class="fa fa-check"></i> Verify-->
+                <!--                        </button>-->
+                <!--                        <button class="btn btn-sm btn-outline-danger ml-2"><i class="fa fa-ban"></i> Reject-->
+                <!--                        </button>-->
+                <!--                    </td>-->
+                <!--                </tr>-->
+
+
+                <!--                <tr>-->
+                <!--                    <td>-->
+                <!--                        <a href="#">Jacques Duquesne</a><br>-->
+                <!--                        <div class="badge badge-secondary p-2 mt-1">Vaccine Exempt</div>-->
+                <!--                    </td>-->
+                <!--                    <td>-->
+                <!--                        <div class="text-muted text-uppercase font-weight-bold" style="font-size: x-small">Vaccine Product</div>-->
+                <!--                        N/A-->
+                <!--                        <div class="small"><i class="fa fa-fw fa-check text-success"></i> <span-->
+                <!--                                class="text-muted font-italic">Verified</span></div>-->
+                <!--                    </td>-->
+                <!--                    <td>-->
+                <!--                        <div class="text-muted text-uppercase font-weight-bold" style="font-size: x-small">Doses</div>-->
+                <!--                        <div class="small"><span class="text-muted">First</span>: <span class="ml-3 font-italic">&nbsp;N/A</span>-->
+                <!--                        </div>-->
+                <!--                        <div class="small"><span class="text-muted">Second</span>: <span class="font-italic">N/A</span>-->
+                <!--                        </div>-->
+                <!--                    </td>-->
+                <!--                    <td>-->
+                <!--                        <div class="text-muted text-uppercase font-weight-bold" style="font-size: x-small">Booster</div>-->
+                <!--                        <span class="font-italic">N/A</span>-->
+                <!--                    </td>-->
+                <!--                    <td>-->
+                <!--                        <div class="text-muted text-uppercase font-weight-bold" style="font-size: x-small">Booster Date</div>-->
+                <!--                        <span class="font-italic">N/A</span>-->
+                <!--                    </td>-->
+                <!--                    <td style="width: 180px">-->
+                <!--                    </td>-->
+                <!--                </tr>-->
+
+
+                <!--                <tr *ngFor="let record of records">-->
+                <!--                    <td style="width: 250px">-->
+                <!--                        {{record.account.firstName}} {{record.account.lastName}}-->
+                <!--                        <div class="small text-muted">{{record.created | date : 'EEE, MMM d, yyyy h:mm a'}}</div>-->
+                <!--                    </td>-->
+
+
+                <!--                </tr>-->
+                <!--                </tbody>-->
+            </table>
+        </div>
+    </div>
+
+    <div class="row mt-3" *ngIf="records && records.length">
+        <div class="col-sm-12 pl-0">
+            <ngb-pagination [collectionSize]="paging.available" (pageChange)="pageVaccines($event)"
+                            [boundaryLinks]="true" [rotate]="true" [(page)]="paging.currentPage"
+                            [maxSize]="5" class="pagination-sm"
+                            [pageSize]="paging.limit"></ngb-pagination>
+        </div>
+    </div>
+
+</div>
+

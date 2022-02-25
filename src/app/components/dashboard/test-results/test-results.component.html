@@ -1,0 +1,166 @@
+<div class="container-fluid pt-3">
+
+    <div class="row mb-3 mt-3">
+        <div class="col-sm-6 pl-0">
+            <div class="w-100 border shadow-sm bg-white p-3" style="height: 400px">
+                <div class="row">
+                    <div class="col-sm">
+                        <b *ngIf="this.selectedSingleOption !== 'ALL'">{{this.selectedSingleOption | titlecase}}'s
+                            Cases</b>
+                        <b *ngIf="this.selectedSingleOption === 'ALL'">All Cases</b>
+                    </div>
+                    <div class="col-sm text-right">
+                        <i class="fa fa-filter text-muted"></i>
+                        <span ngbDropdown>
+                            <button class="btn btn-sm text-secondary small"
+                                    ngbDropdownToggle> {{this.selectedSingleOption | titlecase}}
+                                <ul ngbDropdownMenu class="dropdown-menu p-1">
+                                    <li ngbDropdownItem *ngFor="let option of singleFilterOptions"
+                                        class="small pl-2 cursor-pointer" (click)="filterSingleCounts(option)">
+                                        <div>{{option}}</div>
+                                    </li>
+                                    <li class="dropdown-divider"></li>
+                                    <li ngbDropdownItem class="small pl-2 cursor-pointer"
+                                        (click)="filterSingleCounts('ALL')">All</li>
+                                </ul>
+                            </button>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="row" style="height: 300px"
+                     *ngIf="!single || (!single[0].value && !single[1].value && !single[2].value)">
+                    <div class="col mt-2 text-muted font-italic" style="font-size: 20px">
+                        No results available
+                    </div>
+                </div>
+
+                <div class="row" *ngIf="single && (single[0].value || single[1].value || single[2].value)"
+                     #chartContainerRef>
+                    <div class="col">
+                        <ngx-charts-pie-chart
+                                [view]="[chartContainerRef.offsetWidth, 280]"
+                                [scheme]="colorScheme"
+                                [results]="single"
+                                [gradient]="gradient"
+                                [legend]="showLegend"
+                                [legendPosition]="legendPosition"
+                                [labels]="showLabels"
+                                [doughnut]="isDoughnut">
+                            <!--                        (select)="onSelect($event)"-->
+                            <!--                        (activate)="onActivate($event)"-->
+                            <!--                        (deactivate)="onDeactivate($event)"-->
+                            <!--                >-->
+                        </ngx-charts-pie-chart>
+                    </div>
+                </div>
+
+                <div class="row font-weight-bold" *ngIf="this.single">
+                    <div class="col-sm"></div>
+                    <div class="col-sm-2 text-center">{{this.single[0].value}}
+                        <br><span class="small text-success">Negative</span>
+                    </div>
+                    <div class="col-sm-2 text-center">{{this.single[1].value}}
+                        <br><span class="small text-danger">Positive</span></div>
+                    <div class="col-sm-2 text-center">{{this.single[2].value}}
+                        <br><span class="small text-secondary">Inconclusive</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 pr-0">
+            <div class="w-100 border shadow-sm bg-white p-3" style="height: 400px">
+                <b>Trend</b>
+
+                <div class="row" #trendContainerRef>
+                    <div class="col p-3" *ngIf="retrievingGraphData && !multi">
+                        <img src="assets/loader.gif"> &nbsp; <span class="font-italic text-muted">Retrieving data to generate graph. This might take a few moments...</span>
+                    </div>
+
+                    <div class="col" *ngIf="!retrievingGraphData && multi">
+                        <ngx-charts-area-chart-stacked
+                                [view]="[trendContainerRef.offsetWidth, 400]"
+                                [scheme]="stackedColorScheme"
+                                [legend]="legend"
+                                [showXAxisLabel]="showXAxisLabel"
+                                [showYAxisLabel]="showYAxisLabel"
+                                [xAxis]="xAxis"
+                                [yAxis]="yAxis"
+                                [xAxisLabel]="xAxisLabel"
+                                [yAxisLabel]="yAxisLabel"
+                                [timeline]="timeline"
+                                [results]="multi">
+                            <!--                            (select)="onSelect($event)">-->
+                        </ngx-charts-area-chart-stacked>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row border shadow-sm">
+        <div class="col-sm-12 bg-white">
+            <div *ngIf="!tests || !tests.length" class="p-3">
+                <span class="text-muted font-italic">No COVID-19 results available</span>
+            </div>
+
+            <table class="table table-hover mt-3" *ngIf="tests && tests.length"
+                   [ngClass]="{'opacity-2': paging.processing}">
+                <thead class="small text-uppercase border bg-light text-secondary">
+                <tr>
+                    <th class="border-right py-2">Reporter</th>
+                    <th class="border-right py-2">Location</th>
+                    <th class="border-right py-2">Department</th>
+                    <th class="border-right py-2">Test Location & Date</th>
+                    <th class="border-right py-2">Result</th>
+                    <th class="border-right py-2" style="width: 150px">Action</th>
+
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr *ngFor="let test of tests">
+                    <td style="width: 250px" class="blurry">
+                        {{test.account.firstName}} {{test.account.lastName}}
+                        <div class="small text-muted">{{test.created | date : 'EEE, MMM d, yyyy h:mm a'}}</div>
+                    </td>
+                    <td style="width: 250px">
+                        <div *ngIf="test.district">{{test.district.label}} District
+                            <div class="small" *ngIf="test.school">{{test.school.name}}</div>
+                        </div>
+                    </td>
+                    <td style="width: 150px">
+                        {{test.department}}
+                    </td>
+                    <td>{{test.location}}
+                        <div class="small text-muted">{{test.dateTime | date : 'EEE, MMM d, yyyy'}}</div>
+                    </td>
+                    <td style="width: 100px">
+                        <div class="badge p-2" [ngClass]="{'badge-danger': test.result === 'POSITIVE',
+                        'badge-secondary': test.result === 'INCONCLUSIVE', 'badge-success': test.result === 'NEGATIVE'}">{{test.result}}</div>
+                    </td>
+                    <td class="text-center">
+                        <i class="fa fa-fw fa-file-text-o text-muted fa-2x cursor-pointer" ngbTooltip="View File"
+                           (click)="viewTestResult(test)"></i>
+                        <span *ngIf="test.result === 'POSITIVE'">
+                            <i class="fa fa-fw fa-mobile-phone text-muted fa-2x cursor-pointer"
+                               ngbTooltip="Contact Trace" (click)="contactTrace()"></i>
+                            <i class="fa fa-fw fa-bullhorn text-muted fa-2x cursor-pointer"
+                               ngbTooltip="Notify"></i>
+                        </span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-sm-12 pl-0">
+            <ngb-pagination [collectionSize]="paging.available" (pageChange)="pageTests($event)"
+                            [boundaryLinks]="true" [rotate]="true" [(page)]="paging.currentPage"
+                            [maxSize]="5" class="pagination-sm"
+                            [pageSize]="paging.limit"></ngb-pagination>
+        </div>
+    </div>
+</div>

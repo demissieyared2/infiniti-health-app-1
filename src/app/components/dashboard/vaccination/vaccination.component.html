@@ -1,0 +1,360 @@
+<app-header></app-header>
+
+<div class="bg-light">
+
+    <br><br>
+
+    <div class="container">
+        <div class="row mb-2">
+            <div class="col-sm-12 small text-uppercase text-monospace font-weight-bold">
+                <a style="color: black" href="/">Home</a> / <span class="text-muted">Vaccination record</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container bg-white shadow-sm p-5 pb-5 text-center" *ngIf="submitStatus === 'SUCCESS'">
+        <div class="fa fa-fw fa-check-circle fa-5x text-success "></div>
+
+        <div class="font-weight-bolder pt-2 text-success" style="font-size: x-large">
+            Thank you.<br>
+            Your COVID-19 vaccination information has been successfully submitted.
+        </div>
+
+        <br><br>
+
+        <button class="btn btn-outline-success btn-lg" (click)="goHome()">OK</button>
+    </div>
+
+    <div class="container bg-white shadow-sm p-5 pb-5" *ngIf="!submitStatus || submitStatus === 'PENDING'">
+
+        <div class="row">
+            <div class="col-sm-12">
+                <h3>Vaccination Record</h3>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-12">
+                <ngb-progressbar type="primary" [showValue]="false" [value]="progress"
+                                 style="height: 10px"></ngb-progressbar>
+            </div>
+        </div>
+
+        <ng-container *ngIf="page === 0">
+
+            <div class="row mb-3 pt-4">
+                <div class="col-sm">
+                    <label class="font-weight-bold text-muted">Vaccination Status
+                        <span class="text-danger font-weight-bolder">*</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-sm">
+                    Have you received a COVID-19 vaccination?
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-sm pr-0">
+                    <span class="btn btn-light text-left" (click)="setAnswer(true)">
+                        <i class="fa fa-fw" [ngClass]="{'fa-check-circle': receivedVaccine === 'YES',
+                           'fa-circle-o': !receivedVaccine || receivedVaccine === 'NO'}"></i>
+                        Yes, I have received at least one dose
+                    </span>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-sm pr-0">
+                    <span class="btn btn-light text-left pr-4" (click)="setAnswer(false)">
+                        <i class="fa fa-fw" [ngClass]="{'fa-check-circle': receivedVaccine === 'NO',
+                        'fa-circle-o': !receivedVaccine || receivedVaccine === 'YES'}"></i>
+                        No, I have not been vaccinated &nbsp;
+                    </span>
+                </div>
+            </div>
+
+        </ng-container>
+
+        <ng-container *ngIf="page === 1">
+
+            <div class="row mb-4 pt-4">
+                <div class="col-sm-6">
+                    <label for="role" class="font-weight-bold text-muted">Select vaccination received <span
+                            class="text-danger font-weight-bolder">*</span>
+                    </label>
+                </div>
+
+                <div class="col-sm-4">
+                    <select class="custom-select" id="vaccine-type" required name="vaccine-type"
+                            [(ngModel)]="record.type"
+                            (ngModelChange)="modelChange()" [disabled]="submitStatus === 'PENDING'"
+                            [ngClass]="{'is-invalid': validation.vaccineType}">
+                        <option selected disabled [ngValue]=undefined>Choose One...</option>
+                        <option *ngFor="let option of vaccineOptions" [ngValue]="option.value">{{option.label}}</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-sm-6">
+                    <label for="role" class="font-weight-bold text-muted">Date of first dose <span
+                            class="text-danger font-weight-bolder">*</span>
+                    </label>
+                </div>
+
+                <div class="col-sm-6">
+                    <div class="input-group w-50">
+                        <input class="form-control" [(ngModel)]="record.firstDoseDate" [maxDate]="maxDate"
+                               (dateSelect)="dateSelected($event)" [ngClass]="{'is-invalid': validation.date}"
+                               placeholder="mm/dd/yyyy" name="dp" ngbDatepicker #d="ngbDatepicker">
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-secondary calendar" (click)="d.toggle()" type="button">
+                                <i class="fa fa-fw fa-calendar"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+
+                <div class="col-sm-6">
+                    <span class=" text-muted font-weight-bold">Have you received your second dose? <span
+                            class="text-danger font-weight-bolder">*</span>
+                    </span>
+                </div>
+
+                <div class="col-sm-6">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="second-dose-received" id="secondDoseRadioYes"
+                               [value]="true" [(ngModel)]="record.secondDoseReceived">
+                        <label class="form-check-label" for="secondDoseRadioYes">Yes</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="second-dose-received" id="secondDoseRadioNo"
+                               [value]="false" [(ngModel)]="record.secondDoseReceived">
+                        <label class="form-check-label" for="secondDoseRadioNo">No</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-4" *ngIf="record.secondDoseReceived">
+                <div class="col-sm-6">
+                    <label for="role" class="font-weight-bold text-muted">Date of second dose <span
+                            class="text-danger font-weight-bolder">*</span>
+                    </label>
+                </div>
+
+                <div class="col-sm-6">
+                    <div class="input-group w-50">
+                        <input class="form-control" [(ngModel)]="record.secondDoseDate" [maxDate]="maxDate"
+                               (dateSelect)="dateSelected($event)" [ngClass]="{'is-invalid': validation.date}"
+                               placeholder="mm/dd/yyyy" name="dp" ngbDatepicker #d="ngbDatepicker">
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-secondary calendar" (click)="d.toggle()" type="button">
+                                <i class="fa fa-fw fa-calendar"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-sm-6 align-items-center">
+                    <label for="role" class="font-weight-bold text-muted">Upload picture of vaccination card (or digital
+                        record) <span class="text-danger font-weight-bolder">*</span></label>
+                </div>
+                <div class="col-sm-4">
+                    <div [ngClass]="{'border border-danger p-1 rounded': validation.picture}">
+                        <input type="file" class="d-none" (change)="onFileSelected($event, 'VACCINE')" #fileUpload>
+
+                        <div class="d-flex p-2 cursor-pointer file-upload" (click)="fileUpload.click()">
+                            <div class="p-2">
+                                <i class="fa fa-fw fa-2x fa-cloud-upload text-primary text-left"></i>
+                            </div>
+
+                            <div class="align-self-start" *ngIf="!vaccineFile">
+                                <span class="text-primary">No file selected</span>
+                                <div class="text-muted small">Click to upload file</div>
+                            </div>
+
+                            <div class="align-self-start" *ngIf="vaccineFile">
+                                <span class="text-primary">{{vaccineFile.name}}
+                                    - {{(vaccineFile.size / 1000000) | number}}MB</span>
+                                <div class="text-muted small">Click to upload file</div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <div class="small text-muted font-italic">Max file upload size: 40MB</div>
+                            <div class="small text-primary cursor-pointer" (click)="clearVaccinationFile()">Clear</div>
+                        </div>
+
+                        <hr>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="vaccineCardLostCheck"
+                                   [(ngModel)]="record.vaccineCardLost">
+                            <label class="form-check-label" for="vaccineCardLostCheck">
+                                I have lost my vaccination card
+                            </label>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </ng-container>
+
+        <ng-container *ngIf="page === 2">
+            <div class="row mb-3 pt-4">
+                <div class="col-sm-6">
+                    <span class=" text-muted font-weight-bold">Have you received a COVID-19 vaccination booster? <span
+                            class="text-danger font-weight-bolder">*</span>
+                    </span>
+                </div>
+
+                <div class="col-sm-6">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="supervisor-notified" id="inlineRadio1"
+                               [value]="true" [(ngModel)]="record.boosted">
+                        <label class="form-check-label" for="inlineRadio1">Yes</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="supervisor-notified" id="inlineRadio2"
+                               [value]="false" [(ngModel)]="record.boosted">
+                        <label class="form-check-label" for="inlineRadio2">No</label>
+                    </div>
+                </div>
+            </div>
+
+            <ng-container *ngIf="record.boosted">
+                <div class="row mb-3 pt-4">
+                    <div class="col-sm-6">
+                        <label for="role" class="font-weight-bold text-muted">Select booster received <span
+                                class="text-danger font-weight-bolder">*</span>
+                        </label>
+                    </div>
+
+                    <div class="col-sm-4">
+                        <select class="custom-select" id="role" required name="role" [(ngModel)]="record.boosterType"
+                                (ngModelChange)="modelChange()" [disabled]="submitStatus === 'PENDING'"
+                                [ngClass]="{'is-invalid': validation.vaccineType}">
+                            <option selected disabled [ngValue]=undefined>Choose One...</option>
+                            <option *ngFor="let option of vaccineOptions"
+                                    [ngValue]="option.value">{{option.label}}</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-sm-6">
+                        <label for="role" class="font-weight-bold text-muted">Date of booster <span
+                                class="text-danger font-weight-bolder">*</span></label>
+
+                    </div>
+
+                    <div class="col-sm-6">
+                        <div class="input-group w-50">
+                            <input class="form-control" [(ngModel)]="record.boosterDoseDate" [maxDate]="maxDate"
+                                   (dateSelect)="dateSelected($event)" [ngClass]="{'is-invalid': validation.date}"
+                                   placeholder="mm/dd/yyyy" name="dp" ngbDatepicker #d="ngbDatepicker">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary calendar" (click)="d.toggle()" type="button">
+                                    <i class="fa fa-fw fa-calendar"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-sm-6 align-items-center">
+                        <label for="role" class="font-weight-bold text-muted">Upload a picture of the booster
+                            card (or digital record) <span class="text-danger font-weight-bolder">*</span>
+                        </label>
+                    </div>
+                    <div class="col-sm-4">
+                        <div [ngClass]="{'border border-danger p-1 rounded': validation.picture}">
+                            <input type="file" class="d-none" (change)="onFileSelected($event, 'BOOSTER')"
+                                   #boosterFileUpload>
+
+                            <div class="d-flex p-2 cursor-pointer file-upload" (click)="boosterFileUpload.click()">
+                                <div class="p-2">
+                                    <i class="fa fa-fw fa-2x fa-cloud-upload text-primary text-left"></i>
+                                </div>
+
+                                <div class="align-self-start" *ngIf="!boosterFile">
+                                    <span class="text-primary">No file selected</span>
+                                    <div class="text-muted small">Click to upload file</div>
+                                </div>
+
+                                <div class="align-self-start" *ngIf="boosterFile">
+                                <span class="text-primary">{{boosterFile.name}}
+                                    - {{(boosterFile.size / 1000000) | number}}MB</span>
+                                    <div class="text-muted small">Click to upload file</div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-between">
+                                <div class="small text-muted font-italic">Max file upload size: 40MB</div>
+                                <div class="small text-primary cursor-pointer" (click)="clearVaccinationFile()"
+                                     *ngIf="boosterFile">Clear
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="boosterFileLostCheck"
+                                   [(ngModel)]="record.boosterFileLost">
+                            <label class="form-check-label" for="boosterFileLostCheck">
+                                I have lost my vaccination booster card
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </ng-container>
+
+        </ng-container>
+
+        <hr>
+
+        <div class="row" *ngIf="submitStatus === 'FAILED'">
+            <div class="col-sm mt-2">
+                <div class="alert alert-danger p-2 "><i class="fa fa-exclamation-triangle"></i>
+                    Error submitting information
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+
+            <div class="col text-left">
+                <button class="btn btn-secondary" [disabled]="page <= 0" (click)="previous()">
+                    <i class="fa fa-fw fa-angle-double-left"></i> Previous
+                </button>
+            </div>
+
+            <div class="col text-right">
+                <button class="btn btn-secondary" *ngIf="(receivedVaccine === 'YES' || !receivedVaccine) && page < 3"
+                        (click)="next()">Next <i
+                        class="fa fa-fw fa-angle-double-right"></i></button>
+
+                <button class="btn btn-primary" *ngIf="(receivedVaccine === 'NO') || page > 2"
+                        (click)="submit()" [disabled]="disableSubmit()">
+                    <span *ngIf="!submitStatus">Submit</span>
+                    <span *ngIf="submitStatus === 'PENDING'"><i class="fa fa-spinner fa-pulse fa-fw"></i> Submitting...</span>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <br><br><br><br>
+
+</div>

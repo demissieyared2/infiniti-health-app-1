@@ -1,0 +1,26 @@
+.nav-tabs .nav-link.active {
+    color: #233559;
+    background-color: #fcfcfc;
+    border-bottom: 4px solid #233559;
+    font-weight: bold;
+}
+
+.nav-tabs .nav-link {
+    border: 1px solid transparent;
+    color: #007bff;
+    margin-right: 50px;
+    font-size: 12px;
+    text-transform: uppercase;
+    font-family: Arial, sans-serif;
+}
+
+.nav-link {
+    display: block;
+    /*padding: 1rem 1rem;*/
+}
+
+.nav-tabs .nav-link:hover {
+    border-bottom: 4px solid slategray;
+    color: #333333;
+}
+
